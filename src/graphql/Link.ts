@@ -35,63 +35,76 @@ export const LinkQuery = extendType({  // 2
     },
 });
 
-// export const singleLinkQuery = extendType({  // 2
-//     type: "Query",
-//     definition(t) {
-//         t.nonNull.list.nonNull.field("link", {   // 3
-//             type: "Link",
-//             args: {   // 3
-//                 id: nonNull(intArg()),
-//             },
-//             resolve(parent, args, context, info) {    // 4
-//                 const { id } = args; 
-//                 let link = links.filter(l => l.id == id)
-//                 return link;
-//             },
-//         });
-//     },
-// });
+export const singleLinkQuery = extendType({  // 2
+    type: "Query",
+    definition(t) {
+        t.field("link", {   // 3
+            type: "Link",
+            args: {   // 3
+                id: nonNull(intArg()),
+            },
+            resolve(parent, args, context, info) {    // 4
+                const { id } = args; 
+                const singleLink = context.prisma.link.findUnique({
+                    where: {
+                     id: id,
+                    },
+                  })
+                    return singleLink
+            },
+        });
+    },
+});
 
-// export const deleteLinkQuery = extendType({  // 2
-//     type: "Mutation",
-//     definition(t) {
-//         t.nonNull.list.nonNull.field("deleteLink", {   // 3
-//             type: "Link",
-//             args: {   // 3
-//                 id: nonNull(intArg()),
-//             },
-//             resolve(parent, args, context, info) {    // 4
-//                 const { id } = args; 
-//                 let updatedLinks = links.filter(l => l.id !== id)
-//                 links = updatedLinks
-//                 return links;
-//             },
-//         });
-//     },
-// });
+export const deleteLinkQuery = extendType({  // 2
+    type: "Mutation",
+    definition(t) {
+        t.nonNull.field("deleteLink", {   // 3
+            type: "Link",
+            args: {   // 3
+                id: nonNull(intArg()),
+            },
+            resolve(parent, args, context, info) {    // 4
+                const { id } = args; 
+                const deleteLink = context.prisma.link.delete({
+                    where: {
+                      id: id,
+                    },
+                  })
+                  return deleteLink
+            },
+        });
+    },
+});
 
-// export const updateLinkQuery = extendType({  // 2
-//     type: "Mutation",
-//     definition(t) {
-//         t.nonNull.list.nonNull.field("updateLink", {   // 3
-//             type: "Link",
-//             args: {   // 3
-//                 id: nonNull(intArg()),
-//                 url: nonNull(stringArg()),
-//                 description: nonNull(stringArg())
-//             },
-//             resolve(parent, args, context, info) {    // 4
-//                 const { description, url, id } = args; 
-//                 let updatedLinks = links.filter(l => l.id == id)
-//                 updatedLinks[0].description = description
-//                 updatedLinks[0].url = url
+export const updateLinkQuery = extendType({  // 2
+    type: "Mutation",
+    definition(t) {
+        t.nonNull.field("updateLink", {   // 3
+            type: "Link",
+            args: {   // 3
+                id: nonNull(intArg()),
+                url: nonNull(stringArg()),
+                description: nonNull(stringArg())
+            },
+            resolve(parent, args, context, info) {    // 4
+                const { description, url, id } = args; 
 
-//                 links = updatedLinks
-//                 return links;
-//             },
-//         });
-//     },
-// });
+                const updateLink = context.prisma.link.update({
+                    where: {
+                      id: id,
+                    },
+                    data: {
+                     description: description,
+                     url: url
+                    },
+                  })
+                return updateLink
+
+            },
+        });
+    },
+});
 
 export const LinkMutation = extendType({  // 1
     type: "Mutation",    
