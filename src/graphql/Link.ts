@@ -7,6 +7,14 @@ export const Link = objectType({
         t.nonNull.int("id"); // 3 
         t.nonNull.string("description"); // 4
         t.nonNull.string("url"); // 5 
+        t.field("postedBy", {   // 1
+            type: "User",
+            resolve(parent, args, context) {  // 2
+                return context.prisma.link
+                    .findUnique({ where: { id: parent.id } })
+                    .postedBy();
+            },
+        });
     },
 });
 
@@ -116,12 +124,21 @@ export const LinkMutation = extendType({  // 1
                 url: nonNull(stringArg()),
             },
             resolve(parent, args, context) {    
-                const newLink = context.prisma.link.create({   // 2
+                const { description, url } = args;
+                const { userId } = context;
+
+                if (!userId) {  // 1
+                    throw new Error("Cannot post without logging in.");
+                }
+
+                const newLink = context.prisma.link.create({
                     data: {
-                        description: args.description,
-                        url: args.url,
+                        description,
+                        url,
+                        postedBy: { connect: { id: userId } },  // 2
                     },
                 });
+
                 return newLink;
             },
         });
