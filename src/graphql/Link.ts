@@ -1,4 +1,4 @@
-import { NexusGenObjects } from "../../nexus-typegen"; 
+
 import { extendType, nonNull, objectType, stringArg, intArg, inputObjectType, enumType, arg, list } from "nexus";
 import { Prisma } from "@prisma/client"
 
@@ -8,7 +8,7 @@ export const Link = objectType({
         t.nonNull.int("id"); // 3 
         t.nonNull.string("description"); // 4
         t.nonNull.string("url"); // 5 
-        t.nonNull.dateTime("createdAt"); 
+
         t.field("postedBy", {   // 1
             type: "User",
             resolve(parent, args, context) {  // 2
@@ -55,7 +55,6 @@ export const LinkOrderByInput = inputObjectType({
     definition(t) {
         t.field("description", { type: Sort });
         t.field("url", { type: Sort });
-        t.field("createdAt", { type: Sort });
     },
 });
 
@@ -168,29 +167,29 @@ export const updateLinkQuery = extendType({  // 2
     },
 });
 
-export const LinkMutation = extendType({  // 1
-    type: "Mutation",    
+export const LinkMutation = extendType({
+    type: "Mutation",
     definition(t) {
-        t.nonNull.field("post", {  // 2
-            type: "Link",  
-            args: {   // 3
+        t.nonNull.field("post", {
+            type: "Link",
+            args: {
                 description: nonNull(stringArg()),
                 url: nonNull(stringArg()),
             },
-            resolve(parent, args, context) {    
+            resolve(parent, args, context) {
                 const { description, url } = args;
                 const { userId } = context;
 
-                if (!userId) {  // 1
+
+                if (!userId) {
                     throw new Error("Cannot post without logging in.");
                 }
 
                 const newLink = context.prisma.link.create({
                     data: {
-                        description,
-                        url,
-                        postedBy: { connect: { id: userId } },  // 2
-                    },
+                        description: description,
+                        url: url,
+                       },
                 });
 
                 return newLink;
