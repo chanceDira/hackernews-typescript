@@ -5,8 +5,23 @@
 
 
 import type { Context } from "./src/context"
-
-
+import type { core } from "nexus"
+declare global {
+  interface NexusGenCustomInputMethods<TypeName extends string> {
+    /**
+     * A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+     */
+    dateTime<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "DateTime";
+  }
+}
+declare global {
+  interface NexusGenCustomOutputMethods<TypeName extends string> {
+    /**
+     * A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+     */
+    dateTime<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "DateTime";
+  }
+}
 
 
 declare global {
@@ -14,9 +29,15 @@ declare global {
 }
 
 export interface NexusGenInputs {
+  LinkOrderByInput: { // input type
+    createdAt?: NexusGenEnums['Sort'] | null; // Sort
+    description?: NexusGenEnums['Sort'] | null; // Sort
+    url?: NexusGenEnums['Sort'] | null; // Sort
+  }
 }
 
 export interface NexusGenEnums {
+  Sort: "asc" | "desc"
 }
 
 export interface NexusGenScalars {
@@ -25,6 +46,7 @@ export interface NexusGenScalars {
   Float: number
   Boolean: boolean
   ID: string
+  DateTime: any
 }
 
 export interface NexusGenObjects {
@@ -32,7 +54,13 @@ export interface NexusGenObjects {
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
   }
+  Feed: { // root type
+    count: number; // Int!
+    id?: string | null; // ID
+    links: NexusGenRootTypes['Link'][]; // [Link!]!
+  }
   Link: { // root type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
     description: string; // String!
     id: number; // Int!
     url: string; // String!
@@ -44,6 +72,10 @@ export interface NexusGenObjects {
     id: number; // Int!
     name: string; // String!
   }
+  Vote: { // root type
+    link: NexusGenRootTypes['Link']; // Link!
+    user: NexusGenRootTypes['User']; // User!
+  }
 }
 
 export interface NexusGenInterfaces {
@@ -54,18 +86,25 @@ export interface NexusGenUnions {
 
 export type NexusGenRootTypes = NexusGenObjects
 
-export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
+export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
   AuthPayload: { // field return type
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
   }
+  Feed: { // field return type
+    count: number; // Int!
+    id: string | null; // ID
+    links: NexusGenRootTypes['Link'][]; // [Link!]!
+  }
   Link: { // field return type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
     description: string; // String!
     id: number; // Int!
     postedBy: NexusGenRootTypes['User'] | null; // User
     url: string; // String!
+    voters: NexusGenRootTypes['User'][]; // [User!]!
   }
   Mutation: { // field return type
     deleteLink: NexusGenRootTypes['Link']; // Link!
@@ -73,16 +112,23 @@ export interface NexusGenFieldTypes {
     post: NexusGenRootTypes['Link']; // Link!
     signup: NexusGenRootTypes['AuthPayload']; // AuthPayload!
     updateLink: NexusGenRootTypes['Link']; // Link!
+    vote: NexusGenRootTypes['Vote'] | null; // Vote
   }
   Query: { // field return type
     feed: NexusGenRootTypes['Link'][]; // [Link!]!
     link: NexusGenRootTypes['Link'] | null; // Link
+    userFeed: NexusGenRootTypes['User'][]; // [User!]!
   }
   User: { // field return type
     email: string; // String!
     id: number; // Int!
     links: NexusGenRootTypes['Link'][]; // [Link!]!
     name: string; // String!
+    votes: NexusGenRootTypes['Link'][]; // [Link!]!
+  }
+  Vote: { // field return type
+    link: NexusGenRootTypes['Link']; // Link!
+    user: NexusGenRootTypes['User']; // User!
   }
 }
 
@@ -91,11 +137,18 @@ export interface NexusGenFieldTypeNames {
     token: 'String'
     user: 'User'
   }
+  Feed: { // field return type name
+    count: 'Int'
+    id: 'ID'
+    links: 'Link'
+  }
   Link: { // field return type name
+    createdAt: 'DateTime'
     description: 'String'
     id: 'Int'
     postedBy: 'User'
     url: 'String'
+    voters: 'User'
   }
   Mutation: { // field return type name
     deleteLink: 'Link'
@@ -103,16 +156,23 @@ export interface NexusGenFieldTypeNames {
     post: 'Link'
     signup: 'AuthPayload'
     updateLink: 'Link'
+    vote: 'Vote'
   }
   Query: { // field return type name
     feed: 'Link'
     link: 'Link'
+    userFeed: 'User'
   }
   User: { // field return type name
     email: 'String'
     id: 'Int'
     links: 'Link'
     name: 'String'
+    votes: 'Link'
+  }
+  Vote: { // field return type name
+    link: 'Link'
+    user: 'User'
   }
 }
 
@@ -139,8 +199,17 @@ export interface NexusGenArgTypes {
       id: number; // Int!
       url: string; // String!
     }
+    vote: { // args
+      linkId: number; // Int!
+    }
   }
   Query: {
+    feed: { // args
+      filter?: string | null; // String
+      orderBy?: NexusGenInputs['LinkOrderByInput'][] | null; // [LinkOrderByInput!]
+      skip?: number | null; // Int
+      take?: number | null; // Int
+    }
     link: { // args
       id: number; // Int!
     }
@@ -155,9 +224,9 @@ export interface NexusGenTypeInterfaces {
 
 export type NexusGenObjectNames = keyof NexusGenObjects;
 
-export type NexusGenInputNames = never;
+export type NexusGenInputNames = keyof NexusGenInputs;
 
-export type NexusGenEnumNames = never;
+export type NexusGenEnumNames = keyof NexusGenEnums;
 
 export type NexusGenInterfaceNames = never;
 
